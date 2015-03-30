@@ -1,12 +1,11 @@
 import {FakeHttpRequest} from './FakeHttpRequest';
 
-
 var GlobalXMLHttpRequest = global.XMLHttpRequest,
     GlobalActiveXObject = global.ActiveXObject,
     supportsActiveX = typeof GlobalActiveXObject != "undefined",
     supportsXHR = typeof GlobalXMLHttpRequest != "undefined";
 
-
+var state = new State();
 
 export class Mockery {
 	constructor(){
@@ -15,14 +14,13 @@ export class Mockery {
 
 	static imitate(path, action, fn){
 		//function(request,response)
-
+		FakeHttpRequest.addResponder(path,action,fn);
 	}
-
+	
 	static setup(){
 	    if (supportsXHR) {
             global.XMLHttpRequest = FakeHttpRequest;
         }
-
         if (supportsActiveX) {
             global.ActiveXObject = function ActiveXObject(objId) {
                 if (objId == "Microsoft.XMLHTTP" || /^Msxml2\.XMLHTTP/i.test(objId)) {
