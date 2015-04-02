@@ -60,7 +60,7 @@ export class MockHttpRequest {
 		this.request = null;
 		this.response = null;
 		this.responseText = null;
-		this.statusCode = null;
+		this.status = null;
 		this.statusText = null;
 		this.readyState = 0;
 		this.responseType = 'application/json';
@@ -70,7 +70,7 @@ export class MockHttpRequest {
 		this.request = null;
 		this.response = null;
 		this.responseText = null;
-		this.statusCode = null;
+		this.status = null;
 		this.statusText = null;
 		this.readyState = 0;
 		
@@ -80,7 +80,7 @@ export class MockHttpRequest {
 			var route = res.url, // "/users/:uid/pictures";
 				matcher = new RegExp(route.replace(/:[^\s/]+/g, '([\\w-]+)'));
 			
-			return ( method == res.method && path.match(matcher).length );
+			return ( method == res.method && path.match(matcher) );
 		});
 		
 		if( found.length ){
@@ -103,35 +103,46 @@ export class MockHttpRequest {
 				responseType: 'application/json',
 				callback: responder.callback
 			}
+		} else {
+			this.request = new XMLHttpRequest();
+			this.request.onload = this.onload;
+			this.request.onerror = this.onerror;
+			this.request.ontimeout = this.ontimeout;
+			this.request.onabort = this.onabort;
+			this.request.onreadystatechange = this.onreadystatechange;
+			this.request.open(method, url, async, username, password);
 		}
 	}
 	
 	send(data){
 		var request = this.request;	
-		request.data = data;
-		responder.callback.call(this, request, this);
-		
-		if( this.statusCode < 400 ){
-			if(this.usingReadStateChange){
-				this.readyState = 4;
-				this.onreadystatechange && this.onreadystatechange();
-			} else {
-				this.onload && this.onload();
-			}
+		if( request instanceof XMLHttpRequest) {
+			this.request.send(data);
 		} else {
-			this.onerror && this.onerror();
+			request.data = data;
+			request.callback.call(this, request, this);
+			if( this.status < 400 ){
+				if(this.usingReadyStateChange){
+					this.readyState = 4;
+					this.onreadystatechange && this.onreadystatechange();
+				} else {
+					this.onload && this.onload();
+				}
+			} else {
+				this.onerror && this.onerror();
+			}
 		}
 	}
 	
-	status(value){
-		this.statusCode = value;
+	statusCode(value){
+		this.status = value;
 		this.statusText = STATUS_CODES[value];
 	}
 	json(value){
-		this.response = value.toString();
+		this.response = JSON.stringify(value);
 	}
 	text(value){
-		this.responseText = value.toString();
+		this.responseText = JSON.stringify(value);
 	}
 	type(value){
 		this.responseType = value;
@@ -165,7 +176,7 @@ export class MockHttpRequest {
 		return this.readystatechangehandler;
 	}
 	set onreadystatechange(value){
-		this.usingReadStateChange = true;
+		this.usingReadyStateChange = true;
 		this.readystatechangehandler = value;
 	}
 	
