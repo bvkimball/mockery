@@ -1,9 +1,6 @@
 {
   "name": "mockery",
-  "author": {
-	"name": "Brian Kimball",
-	"email": "bvkimball@gmail.com"
-  },
+  "author": "Brian Kimball <bvkimball@gmail.com>",
   "version": "0.1.1",
   "devDependencies": {
     "del": "^1.1.0",
@@ -17,6 +14,40 @@
     "karma-jasmine": "^0.3.2",
     "run-sequence": "^1.0.2",
     "object.assign": "^1.0.3"
-  }
-  
+  },
+  "description": "An attempt at creating a mock backend specifically for e2e and unit testing framework",
+  "main": "dist/Mockery.js",
+  "dependencies": {
+    "del": "^1.1.1",
+    "gulp-babel": "^4.0.1",
+    "gulp-jshint": "^1.10.0",
+    "jasmine-core": "^2.3.0",
+    "karma": "^0.12.31",
+    "karma-jasmine": "^0.3.5",
+    "karma-babel-preprocessor": "^4.0.1",
+    "gulp": "^3.8.11",
+    "object.assign": "^1.1.1",
+    "run-sequence": "^1.1.0",
+    "karma-chrome-launcher": "^0.1.8",
+    "karma-mocha-reporter": "^0.3.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bvkimball/mockery.git"
+  },
+  "keywords": [
+    "Mock",
+    "Http",
+    "Rest",
+    "API",
+    "Sandbox"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bvkimball/mockery/issues"
+  },
+  "homepage": "https://github.com/bvkimball/mockery#readme"
 }
