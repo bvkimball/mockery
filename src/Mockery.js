@@ -15,9 +15,9 @@ export class Mockery {
 		MockHttpRequest.addResponder(path, action, fn);
 	}
 
-	static setup() {
+	static setup(xhr='XMLHttpRequest') {
 		if (supportsXHR) {
-			global.XHR = MockHttpRequest;
+			global[xhr] = MockHttpRequest;
 		}
 		if (supportsActiveX) {
 			global.ActiveXObject = function ActiveXObject(objId) {
