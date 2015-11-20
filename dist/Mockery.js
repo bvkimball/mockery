@@ -10,6 +10,8 @@ var GlobalXMLHttpRequest = global.XMLHttpRequest,
     supportsActiveX = typeof GlobalActiveXObject != "undefined",
     supportsXHR = typeof GlobalXMLHttpRequest != "undefined";
 
+global.RealXMLHttpRequest = GlobalXMLHttpRequest;
+
 var Mockery = (function () {
 	function Mockery() {
 		_classCallCheck(this, Mockery);
@@ -23,6 +25,11 @@ var Mockery = (function () {
 				MockHttpRequest.addResponder(path, action, fn);
 			}
 		},
+		imitating: {
+			value: function imitating(path, action) {
+				return MockHttpRequest.hasResponder(path, action);
+			}
+		},
 		setup: {
 			value: function setup() {
 				var xhr = arguments[0] === undefined ? "XMLHttpRequest" : arguments[0];
@@ -30,6 +37,7 @@ var Mockery = (function () {
 				if (supportsXHR) {
 					global[xhr] = MockHttpRequest;
 				}
+
 				if (supportsActiveX) {
 					global.ActiveXObject = function ActiveXObject(objId) {
 						if (objId == "Microsoft.XMLHTTP" || /^Msxml2\.XMLHTTP/i.test(objId)) {

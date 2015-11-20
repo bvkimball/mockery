@@ -58,7 +58,7 @@ let STATUS_CODES = {
 export class MockHttpRequest {
 	constructor(){
 		this.request = null;
-		this.response = null;
+		//this.response = null;
 		this.responseText = null;
 		this.status = null;
 		this.statusText = null;
@@ -68,7 +68,7 @@ export class MockHttpRequest {
 	
 	open(method, url, async, username, password) {
 		this.request = null;
-		this.response = null;
+		//this.response = null;
 		this.responseText = null;
 		this.status = null;
 		this.statusText = null;
@@ -80,7 +80,7 @@ export class MockHttpRequest {
 				matcher = new RegExp(route.replace(/:[^\s/]+/g, "([\\w-]+)") + '([\?|\/]|$)');
 			return ( method == res.method && path.match(matcher) );
 		});
-		
+		console.log('imitating', path, found);
 		if( found.length ){
 			var responder = found[0],
 				route = responder.url,
@@ -107,19 +107,27 @@ export class MockHttpRequest {
 				callback: responder.callback
 			};
 		} else {
-			this.request = new XMLHttpRequest();
-			this.request.onload = this.onload;
-			this.request.onerror = this.onerror;
-			this.request.ontimeout = this.ontimeout;
-			this.request.onabort = this.onabort;
-			this.request.onreadystatechange = this.onreadystatechange;
+			this.request = new RealXMLHttpRequest();
 			this.request.open(method, url, async, username, password);
 		}
 	}
 	
 	send(data){
 		var request = this.request;	
-		if( request instanceof XMLHttpRequest) {
+		if( request instanceof RealXMLHttpRequest) {
+            this.request.onload = ()=>{
+                this.status = this.request.status;
+                this.statusText = this.request.statusText;
+                if('response' in this.request)
+                    this.response = this.request.response;
+                this.responseText = this.request.responseText;
+                this.responseType = this.request.responseType;
+                this.onload();
+            }
+			this.request.onerror = this.onerror;
+			this.request.ontimeout = this.ontimeout;
+			this.request.onabort = this.onabort;
+			this.request.onreadystatechange = this.onreadystatechange;
 			this.request.send(data);
 		} else {
 			request.data = data;
@@ -156,7 +164,7 @@ export class MockHttpRequest {
 		return this.loadhandler;
 	}
 	set onload(value){
-		this.loadhandler = value;
+        this.loadhandler = value;
 	}
 	get ontimeout(){
 		return this.timeouthandler;
@@ -185,10 +193,35 @@ export class MockHttpRequest {
 	}
 	
 	setRequestHeader(header, value) {
-		//ignore
+        if( this.request instanceof RealXMLHttpRequest) {
+			this.request.setRequestHeader(header, value);
+		} 
 	}
+    getResponseHeader(header) {
+        if( this.request instanceof RealXMLHttpRequest) {
+			this.request.getResponseHeader(header);
+		} 
+	}
+    getAllResponseHeaders(){
+        if( this.request instanceof RealXMLHttpRequest) {
+			this.request.getAllResponseHeaders();
+		} else {
+            return [];    
+        }
+    }
 	
 	static addResponder(url, method, callback){
 		responders.push({url,method,callback})
+	}
+    
+    static hasResponder(url, method){
+        var path = getPath(url);
+		var found = responders.filter(function(res, i){
+			var route = res.url, 
+				matcher = new RegExp(route.replace(/:[^\s/]+/g, "([\\w-]+)") + '([\?|\/]|$)');
+			return ( method == res.method && path.match(matcher) );
+		});
+		
+		return found.length > 0;
 	}
 }
